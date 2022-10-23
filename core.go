@@ -1,9 +1,14 @@
 package GoMWF
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 const version = "1.0.0"
@@ -16,6 +21,7 @@ type GoMWF struct {
 	InfoLog  *log.Logger
 	RootPath string
 	config   config
+	Routes   *chi.Mux
 }
 
 type config struct {
@@ -40,12 +46,28 @@ func (c *GoMWF) New(rootPath string) error {
 	c.DEBUG, _ = strconv.ParseBool(os.Getenv("DEBUG"))
 	c.Version = version
 	c.RootPath = rootPath
+	c.Routes = c.routes().(*chi.Mux)
 	c.config = config{
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
 	}
 
 	return nil
+}
+
+func (c *GoMWF) ListenAndServe() {
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
+		ErrorLog:     c.ErrorLog,
+		Handler:      c.routes(),
+		IdleTimeout:  30 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 600 * time.Second,
+	}
+
+	c.InfoLog.Printf("Listening on port %s", os.Getenv("PORT"))
+	err := srv.ListenAndServe()
+	c.ErrorLog.Fatal(err)
 }
 
 func (c *GoMWF) startLoggers() (*log.Logger, *log.Logger) {
