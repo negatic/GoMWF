@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/negatic/GoMWF/renderer"
 )
 
 const version = "1.0.0"
@@ -22,6 +23,7 @@ type GoMWF struct {
 	RootPath string
 	config   config
 	Routes   *chi.Mux
+	Render   *renderer.Renderer
 }
 
 type config struct {
@@ -51,6 +53,8 @@ func (c *GoMWF) New(rootPath string) error {
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
 	}
+
+	c.Render = c.createRenderer(c)
 
 	return nil
 }
@@ -89,4 +93,15 @@ func (c *GoMWF) Init(p initPaths) error {
 		}
 	}
 	return nil
+}
+
+func (c *GoMWF) createRenderer(gomwf *GoMWF) *renderer.Renderer {
+
+	myRenderer := renderer.Renderer{
+		Renderer: gomwf.config.renderer,
+		Rootpath: gomwf.RootPath,
+		Port:     gomwf.config.port,
+	}
+
+	return &myRenderer
 }
