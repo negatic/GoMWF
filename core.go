@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CloudyKit/jet"
 	"github.com/go-chi/chi/v5"
 	"github.com/negatic/GoMWF/renderer"
 )
@@ -24,6 +25,7 @@ type GoMWF struct {
 	config   config
 	Routes   *chi.Mux
 	Render   *renderer.Renderer
+	JetViews *jet.Set
 }
 
 type config struct {
@@ -53,6 +55,9 @@ func (c *GoMWF) New(rootPath string) error {
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
 	}
+	var views = jet.NewSet(
+		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+	)
 
 	c.createRenderer()
 
