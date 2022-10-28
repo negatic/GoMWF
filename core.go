@@ -59,6 +59,8 @@ func (c *GoMWF) New(rootPath string) error {
 		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
 	)
 
+	c.JetViews = views
+
 	c.createRenderer()
 
 	return nil
@@ -106,6 +108,7 @@ func (c *GoMWF) createRenderer() {
 		Renderer: c.config.renderer,
 		Rootpath: c.RootPath,
 		Port:     c.config.port,
+		JetViews: c.JetViews,
 	}
 
 	c.Render = &myRenderer
